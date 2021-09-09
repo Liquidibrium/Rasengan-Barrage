@@ -2,7 +2,8 @@ import cv2
 import traceback
 from cvzone.HandTrackingModule import HandDetector
 from util import overlay_transparent
-
+import imageio
+import numpy as np
 BIT_MASK = ((1 << 33) - 2)
 
 
@@ -30,11 +31,24 @@ def main_func():
     start_dist = None
     scale = 0
     cx, cy = 500, 500
-    img = cv2.imread("img/rasengan.png", cv2.IMREAD_UNCHANGED)
-    img = cv2.resize(img, (0, 0), None, 0.5, 0.5)
+
+    # img = cv2.imread("img/rasengan.png", cv2.IMREAD_UNCHANGED)
+    # img = cv2.resize(img, (0, 0), None, 0.5, 0.5)
     success, video_img = cap.read()  # first read for height and width
     h, w, c = video_img.shape  # can be made consts
+
+    npArr = []
+    im = imageio.get_reader("img/transp3.gif")  # transp3.gif is only one not cummulatie
+    for frame in im:
+        npArr.append(np.array(frame))
+    idx = 0
     while True:
+
+        if idx >= len(npArr):
+            idx = 0
+        img = npArr[idx]
+        # print(img.shape)
+        idx += 1
         success, video_img = cap.read()
         video_img = cv2.flip(video_img, 1)
         # hands = detector.findHands(video_img, draw=False)  # don't draw
