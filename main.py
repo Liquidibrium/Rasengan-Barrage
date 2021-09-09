@@ -3,7 +3,7 @@ import traceback
 from cvzone.HandTrackingModule import HandDetector
 from util import overlay_transparent
 
-BIT_MASK = ((1 << 33) - 2)
+BIT_MASK = ((1 << 65) - 2)
 
 
 def is_hand_gesture(detector, hand1, hand2, up_down=True):
@@ -11,13 +11,13 @@ def is_hand_gesture(detector, hand1, hand2, up_down=True):
     return detector.fingersUp(hand1) == fingers_list and detector.fingersUp(hand2) == fingers_list
 
 
-def draw_transparent(foreground, background, cx, cy, newW, newH):
-    return overlay_transparent(background, foreground, cx - (newW >> 1), cy - (newH >> 1))
+def draw_transparent(foreground, background, cx, cy, new_w, new_h):
+    return overlay_transparent(background, foreground, cx - (new_w >> 1), cy - (new_h >> 1))
 
 
 def get_resized_values(foreground, scale):
     h1, w1, _ = foreground.shape
-    new_h, new_w = ((h1 + scale) & BIT_MASK), ((w1 + scale) & BIT_MASK)
+    new_h, new_w = (max(h1 + scale, 2) & BIT_MASK), (max(w1 + scale, 2) & BIT_MASK)
     foreground = cv2.resize(foreground, (new_w, new_h))
     return new_h, new_w, foreground
 
