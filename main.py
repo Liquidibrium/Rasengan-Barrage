@@ -30,29 +30,31 @@ def resizeImg(foreground, background):
     return overlay_transparent(background, foreground, cx - (newW >> 1), cy - (newH >> 1))
 
 
-while True:
-    success, video_img = cap.read()
-    hands, ig = detector.findHands(video_img)
-    img = cv2.imread("img/rasengan.png", cv2.IMREAD_UNCHANGED)
-    if len(hands) == 2:
-        left_hand = hands[0]
-        right_hand = hands[1]
-        if isHandGesture(left_hand, right_hand):
-            if startDist is None:
+if __name__ == "__main__":
+    while True:
+        success, video_img = cap.read()
+        hands, ig = detector.findHands(video_img)
+        img = cv2.imread("img/rasengan.png", cv2.IMREAD_UNCHANGED)
+        if len(hands) == 2:
+            left_hand = hands[0]
+            right_hand = hands[1]
+            if isHandGesture(left_hand, right_hand):
+                if startDist is None:
+                    length, info, video_img = detector.findDistance(left_hand["center"], right_hand["center"],
+                                                                    video_img)
+                    startDist = length
                 length, info, video_img = detector.findDistance(left_hand["center"], right_hand["center"], video_img)
-                startDist = length
-            length, info, video_img = detector.findDistance(left_hand["center"], right_hand["center"], video_img)
-            scale = int((length - startDist) // 2)
-            cx, cy = info[4:]
-            print(scale)
-        try:
-            video_img = resizeImg(img, video_img)
-        except Exception as e:
-            traceback.print_exc()
-    else:
-        startDist = None
+                scale = int((length - startDist) // 2)
+                cx, cy = info[4:]
+                print(scale)
+            try:
+                video_img = resizeImg(img, video_img)
+            except Exception as e:
+                traceback.print_exc()
+        else:
+            startDist = None
 
-    cv2.imshow("Image", video_img)
-    key = cv2.waitKey(1)
-    if key & 0XFF == ord(' '):
-        break
+        cv2.imshow("Image", video_img)
+        key = cv2.waitKey(1)
+        if key & 0XFF == ord(' '):
+            break
