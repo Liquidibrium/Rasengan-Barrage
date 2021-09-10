@@ -1,10 +1,12 @@
 import cv2
 import traceback
+import imageio
+import numpy as np
 from cvzone.HandTrackingModule import HandDetector
 from util import overlay_transparent
+from itertools import cycle
 
 BIT_MASK = ((1 << 65) - 2)
-
 DEFAULT_PNG = "img/rasengan0.png"
 DEFAULT_GIF = "img/rasengan0.gif"
 
