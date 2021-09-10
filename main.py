@@ -40,6 +40,7 @@ def main_func():
     npArr = []
     im = imageio.get_reader("img/transp3.gif")  # transp3.gif is only one not cummulatie
     for frame in im:
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
         npArr.append(np.array(frame))
     idx = 0
     while True:
