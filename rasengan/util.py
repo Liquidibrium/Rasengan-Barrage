@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def overlay_transparent(background, overlay, x, y):
+def overlay_transparent(background: np.ndarray, overlay: np.ndarray, x: int, y: int) -> np.ndarray:
     background_width = background.shape[1]
     background_height = background.shape[0]
 
@@ -27,9 +27,9 @@ def overlay_transparent(background, overlay, x, y):
             axis=2,
         )
 
-    overlay_image = overlay[..., :3]
+    overlay_img = overlay[..., :3]
     mask = overlay[..., 3:] / 255.0
 
-    background[y:y + h, x:x + w] = (1.0 - mask) * background[y:y + h, x:x + w] + mask * overlay_image
+    background[y:y + h, x:x + w] = (1.0 - mask) * background[y:y + h, x:x + w] + mask * overlay_img
 
     return background
