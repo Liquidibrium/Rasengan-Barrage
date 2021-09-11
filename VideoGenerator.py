@@ -9,6 +9,7 @@ from itertools import cycle
 BIT_MASK = ((1 << 65) - 2)
 DEFAULT_PNG = "img/rasengan0.png"
 DEFAULT_GIF = "img/rasengan0.gif"
+DEFAULT_MP4 = "video/Rasengan-green-screen.mp4"
 
 
 def get_gif_frames(path_to_gif: str):
@@ -17,13 +18,30 @@ def get_gif_frames(path_to_gif: str):
     for frame in im:
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
         frames.append(np.array(frame))
-    return cycle(frames)
+    return frames
 
 
 def get_png(path_to_png: str):
     img = cv2.imread(path_to_png, cv2.IMREAD_UNCHANGED)
     img = cv2.resize(img, (0, 0), None, 0.5, 0.5)
-    return cycle([img])
+    return [img]
+
+
+def get_mp4_frames(path_to_mp4):
+    cap = cv2.VideoCapture(path_to_mp4)
+    frames = []
+    while cap.isOpened():
+        success, frame = cap.read()
+        if not success:
+            break
+        frame = cv2.resize(frame, (640, 480))
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2RGBA)
+        u_green = np.array([60, 250, 50, 255])
+        l_green = np.array([40, 230, 30, 255])
+        mask = cv2.inRange(frame, l_green, u_green)
+        frame[mask != 0] = np.array([0, 0, 0, 0])
+        frames.append(frame)
+    return frames
 
 
 def is_hand_gesture(detector, hand1, hand2, up_down=True):
@@ -52,7 +70,9 @@ def get_frames_to_render(file_type: str, path_to_file: str):
             path_to_file = DEFAULT_GIF
         return get_gif_frames(path_to_file)
     elif file_type == "mp4":
-        pass
+        if not path_to_file:
+            path_to_file = DEFAULT_MP4
+        return get_mp4_frames(path_to_file)
     raise NotImplemented
 
 
@@ -68,14 +88,12 @@ def capture_live(frames):
     success, video_img = cap.read()  # first read for height and width
     h, w, c = video_img.shape  # can be made consts
     while cap.isOpened():
-
-        img = next(frames)
-        # print(img.shape)
         success, video_img = cap.read()
         video_img = cv2.flip(video_img, 1)
         # hands = detector.findHands(video_img, draw=False)  # don't draw
         hands, video_img = detector.findHands(video_img)  # draw
         if len(hands) == 2:
+            img = next(frames)
             left_hand = hands[0]
             right_hand = hands[1]
             if is_hand_gesture(detector, left_hand, right_hand):
@@ -105,8 +123,10 @@ def capture_live(frames):
 
 def live_video_generator(file_type, path_to_file=None):
     frames = get_frames_to_render(file_type, path_to_file)
-    capture_live(frames)
+    capture_live(cycle(frames))
 
 
 if __name__ == "__main__":
-    live_video_generator("gif")
+    # extract_frames(DEFAULT_MP4)
+    live_video_generator("mp4")
+    # get_png(DEFAULT_PNG)
