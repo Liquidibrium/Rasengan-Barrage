@@ -104,12 +104,9 @@ def capture_live(frames):
                 cx, cy = info[4:]
             try:
                 new_h, new_w, foreground = get_resized_values(img, scale)
-                start_x = cx - new_w // 2
-                start_y = cy - new_h // 2
-                end_x = start_x + new_w
-                end_y = start_y + new_h
-                if not (start_x < 0 or start_y < 0 or end_x > w or end_y > h):
-                    video_img = draw_transparent(foreground, video_img, cx, cy, new_w, new_h)
+                cx = max(cx, new_w // 2)
+                cy = max(cy, new_h // 2)
+                video_img = draw_transparent(foreground, video_img, cx, cy, new_w, new_h)
             except ValueError:
                 traceback.print_exc()
         else:
