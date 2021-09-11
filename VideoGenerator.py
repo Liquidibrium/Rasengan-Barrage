@@ -76,7 +76,7 @@ def get_frames_to_render(file_type: str, path_to_file: str):
     raise NotImplemented
 
 
-def capture_live(frames):
+def capture_live(frames, show=False):
     cap = cv2.VideoCapture(0)  # windows warning solution  cv2.CAP_DSHOW
     cap.set(3, 1280)
     cap.set(4, 720)
@@ -90,8 +90,10 @@ def capture_live(frames):
     while cap.isOpened():
         success, video_img = cap.read()
         video_img = cv2.flip(video_img, 1)
-        # hands = detector.findHands(video_img, draw=False)  # don't draw
-        hands, video_img = detector.findHands(video_img)  # draw
+        if show:
+            hands, video_img = detector.findHands(video_img)
+        else:
+            hands = detector.findHands(video_img, draw = False)
         if len(hands) == 2:
             img = next(frames)
             left_hand = hands[0]
@@ -118,9 +120,9 @@ def capture_live(frames):
             break
 
 
-def live_video_generator(file_type, path_to_file=None):
+def live_video_generator(file_type, path_to_file=None, show=False):
     frames = get_frames_to_render(file_type, path_to_file)
-    capture_live(cycle(frames))
+    capture_live(cycle(frames), show)
 
 
 if __name__ == "__main__":
