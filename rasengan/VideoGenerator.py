@@ -1,18 +1,20 @@
-import cv2
 import traceback
+from itertools import cycle
+
+import cv2
 import imageio
 import numpy as np
 from cvzone.HandTrackingModule import HandDetector
-from util import overlay_transparent
-from itertools import cycle
+
+from rasengan.util import overlay_transparent
 
 BIT_MASK = ((1 << 65) - 2)
-DEFAULT_PNG = "img/rasengan0.png"
-DEFAULT_GIF = "img/rasengan0.gif"
-DEFAULT_MP4 = "video/Rasengan-green-screen.mp4"
+DEFAULT_PNG = "media/rasengan0.png"
+DEFAULT_GIF = "media/rasengan0.gif"
+DEFAULT_MP4 = "media/Rasengan-green-screen.mp4"
 
 
-def get_gif_frames(path_to_gif: str):
+def get_gif_frames(path_to_gif: str) -> list:
     frames = []
     im = imageio.get_reader(path_to_gif)
     for frame in im:
@@ -21,13 +23,13 @@ def get_gif_frames(path_to_gif: str):
     return frames
 
 
-def get_png(path_to_png: str):
+def get_png(path_to_png: str) -> list:
     img = cv2.imread(path_to_png, cv2.IMREAD_UNCHANGED)
     img = cv2.resize(img, (0, 0), None, 0.5, 0.5)
     return [img]
 
 
-def get_mp4_frames(path_to_mp4):
+def get_mp4_frames(path_to_mp4: str) -> list:
     cap = cv2.VideoCapture(path_to_mp4)
     frames = []
     while cap.isOpened():
@@ -44,23 +46,24 @@ def get_mp4_frames(path_to_mp4):
     return frames
 
 
-def is_hand_gesture(detector, hand1, hand2, up_down=True):
+def is_hand_gesture(detector: HandDetector, hand1: dict, hand2: dict, up_down: bool = True) -> bool:
     fingers_list = [1, 1, 1, 1, 1] if up_down else [0, 0, 0, 0, 0]
     return detector.fingersUp(hand1) == fingers_list and detector.fingersUp(hand2) == fingers_list
 
 
-def draw_transparent(foreground, background, cx, cy, new_w, new_h):
+def draw_transparent(foreground: np.ndarray, background: np.ndarray, cx: int, cy: int, new_w: int, new_h: int) \
+        -> np.ndarray:
     return overlay_transparent(background, foreground, cx - (new_w >> 1), cy - (new_h >> 1))
 
 
-def get_resized_values(foreground, scale):
+def get_resized_values(foreground: np.ndarray, scale: int) -> tuple[int, int, np.ndarray]:
     h1, w1, _ = foreground.shape
     new_h, new_w = (max(h1 + scale, 2) & BIT_MASK), (max(w1 + scale, 2) & BIT_MASK)
     foreground = cv2.resize(foreground, (new_w, new_h))
     return new_h, new_w, foreground
 
 
-def get_frames_to_render(file_type: str, path_to_file: str):
+def get_frames_to_render(file_type: str, path_to_file: str = None) -> list:
     if file_type == "png":
         if not path_to_file:
             path_to_file = DEFAULT_PNG
@@ -73,10 +76,10 @@ def get_frames_to_render(file_type: str, path_to_file: str):
         if not path_to_file:
             path_to_file = DEFAULT_MP4
         return get_mp4_frames(path_to_file)
-    raise NotImplemented
+    raise NotImplementedError
 
 
-def capture_live(frames, show=False):
+def capture_live(frames: cycle, show: bool = False) -> None:
     cap = cv2.VideoCapture(0)  # windows warning solution  cv2.CAP_DSHOW
     cap.set(3, 1280)
     cap.set(4, 720)
@@ -93,7 +96,7 @@ def capture_live(frames, show=False):
         if show:
             hands, video_img = detector.findHands(video_img)
         else:
-            hands = detector.findHands(video_img, draw = False)
+            hands = detector.findHands(video_img, draw=False)
         if len(hands) == 2:
             img = next(frames)
             left_hand = hands[0]
@@ -120,7 +123,7 @@ def capture_live(frames, show=False):
             break
 
 
-def live_video_generator(file_type, path_to_file=None, show=False):
+def live_video_generator(file_type: str, path_to_file: str = None, show: bool = False) -> None:
     frames = get_frames_to_render(file_type, path_to_file)
     capture_live(cycle(frames), show)
 

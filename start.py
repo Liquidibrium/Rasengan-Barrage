@@ -1,5 +1,5 @@
 import click
-from VideoGenerator import live_video_generator
+from rasengan.VideoGenerator import live_video_generator
 
 
 @click.command()
@@ -12,14 +12,15 @@ from VideoGenerator import live_video_generator
               help="show hand overlay", )
 def cli(ext: str, file: str, show: bool) -> None:
     ext = ext.lower()
-    if not ext in ['png', 'gif', 'mp4']:
-        click.echo(f"not proper type of file")
+    if ext not in ['png', 'gif', 'mp4']:
+        click.echo("not proper type of file")
         return
     if show:
         click.echo("Show hand overlay enabled")
     click.echo(f"importing <{ext}> from <{file}>")
     live_video_generator(ext, file, show)
     click.echo("Done!")
+
 
 if __name__ == "__main__":
     cli()
