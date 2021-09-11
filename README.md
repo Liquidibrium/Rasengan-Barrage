@@ -17,6 +17,7 @@ Options:
   -e, --ext TEXT   extension of file to be rendered as rasengan. should be in
                    [png,gif,mp4]
   -f, --file TEXT  location of file to be renders as rasengan
+  -s, --show       show hand overlay
   --help           Show this message and exit.
 ```
 
