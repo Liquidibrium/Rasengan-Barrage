@@ -36,8 +36,8 @@ def get_mp4_frames(path_to_mp4):
             break
         frame = cv2.resize(frame, (640, 480))
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2RGBA)
-        u_green = np.array([60, 250, 50, 255])
-        l_green = np.array([40, 230, 30, 255])
+        u_green = np.array([100, 255, 100, 255])
+        l_green = np.array([0, 150, 0, 255])
         mask = cv2.inRange(frame, l_green, u_green)
         frame[mask != 0] = np.array([0, 0, 0, 0])
         frames.append(frame)
